@@ -1,15 +1,34 @@
-$(document).ready(function(){
-	
-  //login and get user details
+$(document).ready(() => {
 
-  $("#login").click(function(){
-  	$.token=$("#user_token").val();
-   if($.token.length<6){
-  		alert("Token Is not valid")
-  	} 
-	else {
-  		$.ajax({
-  			url:'https://graph.facebook.com/me?fields=id,email,name,birthday,picture.height(400),cover,gender,hometown,age_range,first_name,middle_name,last_name&access_token='+$.token,
+		$('#login').click(()=>{
+			
+				 $.token=$("#user_token").val();  
+				 if($.token.length < 6) {
+				  
+				  alert("Token Is not valid")
+				 
+				 } 	
+				 
+				 else {
+						 
+				   getProfileData(); 
+				}
+		})// end get data 
+		
+		 $('#get_feed').click(()=>{
+			 
+			 getfeedData()
+			 
+		})// end get data 
+
+}); // end of document.ready()
+
+let getProfileData = () => {
+
+    console.log("making request")
+
+    $.ajax({
+       url:'https://graph.facebook.com/me?fields=id,email,name,birthday,picture.height(400),cover,gender,hometown,age_range,first_name,middle_name,last_name&access_token='+$.token,
   			dataType:'JSON',
   			method:'GET',
   			success:function(response){
@@ -41,39 +60,62 @@ $(document).ready(function(){
 				$("#pro_pic").attr("src",pic);
   				$("#fade-wrapper").css('display','none');
   				
-  			}
-			,error : function(request,errorType,errorMessage){
-			                    console.log(request);
-			                    console.log(errorType);
-								 alert("Wrong Access token !");
-			                }
-  		});
-  		
-  		
-  	}
+  		},
+        error: (response) => { // in case of error response
+
+            alert("some error occured")
+
+        },
+
+        beforeSend: () => { // while request is processing.
+
+            // you can use loader here.
+            alert("request is being made. please wait")
+
+        },
+        complete: () => {
+
+            // what you want to do while request is completed
+            alert("data fetched success")
+
+        },
+
+        timeout:3000 // this is in milli seconds
+
+    }); // end of AJAX request
+
+} // end of getAllData
+
+
+
+let getfeedData = () => {
 	
-});
 
-  //get feed
-
-			$("#get_feed").click(function(){
 					$.ajax({
 						method:"GET",
-						url:"https://graph.facebook.com/v2.9/me/?fields=feed.limit(4)%7Bfrom%2Cmessage%7D&access_token="+$.token,
+						url:"https://graph.facebook.com/v2.9/me/?fields=feed.limit(4)&access_token="+$.token,
 						success:function(response){
 							console.log(response);
 							var feed = response.feed.data;
-							var content = "<table class='table'>"
+							var content = "<table class='table'><tr><th>Story</th><th>Message</th></tr>"
 								for (let i in feed){
 								     var mess = feed[i].message ? feed[i].message : "No Message";
-									content += '<tr><td> ' +  feed[i].from.name + '</td><td> ' +  mess + '</td></tr>';
+									content += '<tr><td> ' +  feed[i].story + '</td><td> ' +  mess + '</td></tr>';
 								}
 								content += "</table>"
 
 								$('#here_table').html(content);
+						},
+						
+						error: (response) => { 
+
+							alert("some error occured")
+
 						}
 					});
-				});		
-});	
+				
+	
+}
+
 	
 	
